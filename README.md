@@ -1,160 +1,103 @@
-# Crop Yield Prediction Pipeline
+# Predicción de Rendimiento de Cultivos de Maíz
 
-A comprehensive machine learning pipeline for predicting maize crop yields using historical field data, climate information, and agronomic management practices.
+Este proyecto desarrolla un pipeline de machine learning para predecir el rendimiento de cultivos de maíz basado en datos climáticos, uso de pesticidas y fertilizantes.
 
-## 🎯 Project Overview
+## Resumen del Proyecto
 
-This project implements an end-to-end ML pipeline to help farmers make informed decisions about their maize crops by predicting yield based on various factors including:
+El objetivo es construir un modelo que pueda predecir el rendimiento de maíz (yield) utilizando variables como temperatura, precipitaciones, uso de pesticidas y fertilizantes por área geográfica y año.
 
-- Historical field data
-- Climate conditions
-- Agronomic management practices
-- Soil characteristics
+## Dataset
 
-## 🚀 Quick Start
+Utilizamos el dataset de Kaggle "Crop Yield Prediction Dataset" que contiene:
+- yield.csv: Rendimiento de maíz por área y año
+- temp.csv: Datos de temperatura promedio
+- rainfall.csv: Datos de precipitaciones
+- pesticides_by_type.csv: Uso de pesticidas por tipo (este y el siguiente dataset fueron incluidos manualmente desde otra fuente, ver primeras líneas de la notebook EDA.ipynb)
+- fertilizers_by_type.csv: Uso de fertilizantes por tipo
 
-### Prerequisites
-- Python 3.8+
-- pip
+Los datos cubren diferentes países y años, permitiendo análisis temporal y geográfico.
 
-### Installation
+## Metodología
 
-1. **Clone the repository**
-   ```bash
-   git clone <repository-url>
-   cd crop-yield-predictor
-   ```
+### Preparación de Datos
 
-2. **Create and activate virtual environment**
-   ```bash
-   # Windows
-   python -m venv venv
-   .\venv\Scripts\Activate.ps1
-   
-   # Linux/Mac
-   python -m venv venv
-   source venv/bin/activate
-   ```
+**Descarga y almacenamiento:**
+Los datos se descargan directamente desde Kaggle usando kagglehub y se mueven la carpeta local `data/`.
 
-3. **Install dependencies**
-   ```bash
-   pip install -r requirements.txt
-   ```
+**Limpieza de variables:**
+Se identifican y eliminan columnas que tienen un solo valor único, ya que no aportan información discriminante para el modelo.
 
-4. **Verify installation**
-   ```bash
-   python test_installation.py
-   ```
+**Estandarización de columnas:**
+Se aplica una función para normalizar nombres de columnas:
+- Convertir a minúsculas
+- Eliminar espacios extra al inicio y final
+- Reemplazar espacios internos por guiones bajos
 
-## 📁 Project Structure
+**Homogeneización de identificadores:**
+Se renombra la columna 'country' a 'area' en el dataset de temperatura para que coincida con los otros dataframes.
+
+### Análisis Exploratorio
+
+**Combinación de datasets:**
+Se realiza merge secuencial usando left join en las columnas 'year' y 'area'.
+
+El orden de merge es:
+1. yield (base)
+2. + temperature
+3. + rainfall  
+4. + pesticides
+5. + fertilizers
+
+**Análisis de completitud:**
+Se examina la presencia de valores faltantes y la cardinalidad de las variables categóricas principales (area y year) para entender la cobertura temporal y geográfica de los datos.
+
+## Estructura del Proyecto
 
 ```
 crop-yield-predictor/
-├── src/                           # Main source code
-│   ├── __init__.py
-│   ├── data_pipeline.py          # Data loading and preprocessing
-│   ├── feature_engineering.py    # Feature creation and engineering
-│   ├── model.py                  # ML model training and evaluation
-│   ├── api.py                    # FastAPI endpoints
-│   └── config.py                 # Configuration management
-├── tests/                        # Unit tests
-├── data/                         # Data storage (gitignored)
-├── models/                       # Trained models (gitignored)
-├── notebooks/                    # Jupyter notebooks
-├── requirements.txt              # Python dependencies
-├── .gitignore                   # Git ignore rules
-└── README.md                    # This file
+├── data/                    # Datasets descargados
+├── notebooks/              # Análisis exploratorio
+│   └── EDA.ipynb           # Notebook principal
+├── requirements.txt        # Dependencias
+└── README.md              # Este archivo
 ```
 
-## 🔧 Development Setup
+## Configuración del Entorno
 
-### Jupyter Notebook
-The project includes a Jupyter kernel for interactive development:
-
+1. Crear y activar entorno virtual:
 ```bash
-# Activate virtual environment
-.\venv\Scripts\Activate.ps1
-
-# Start Jupyter
-jupyter notebook
+python -m venv venv
+venv\Scripts\activate
 ```
 
-### Code Quality
-The project includes development tools for code quality:
-
-- **Black**: Code formatting
-- **Flake8**: Linting
-- **MyPy**: Type checking
-- **Pre-commit**: Git hooks
-
-## 📊 Dataset
-
-The primary dataset is from Kaggle:
-- [Crop Yield Prediction Dataset](https://www.kaggle.com/datasets/patelris/crop-yield-prediction-dataset)
-
-## 🏗️ Architecture
-
-### Data Pipeline
-- Data loading and validation
-- Missing value handling
-- Data type validation
-- Logging and monitoring
-
-### Feature Engineering
-- Climate feature extraction
-- Soil characteristic features
-- Agronomic practice features
-- Temporal features
-
-### Model Development
-- Multiple algorithm comparison (Random Forest, Linear Regression)
-- Hyperparameter optimization
-- Cross-validation strategies
-- Performance metrics (RMSE, R², MAE)
-
-### API Development
-- FastAPI-based REST API
-- Input validation
-- Health check endpoints
-- Prediction endpoints
-
-## 🧪 Testing
-
-Run tests with pytest:
+2. Instalar dependencias:
 ```bash
-pytest tests/
+pip install -r requirements.txt
 ```
 
-## 📈 Metrics
-
-The model evaluation focuses on:
-- **RMSE**: Root Mean Square Error
-- **R²**: Coefficient of determination
-- **MAE**: Mean Absolute Error
-
-## 🚀 Deployment
-
-### Local Development
+3. Configurar kernel de Jupyter:
 ```bash
-# Start the API server
-uvicorn src.api:app --reload
+python -m ipykernel install --user --name=venv --display-name="Python (venv)"
 ```
 
-### Docker (Optional)
-```bash
-# Build and run with Docker
-docker build -t crop-yield-predictor .
-docker run -p 8000:8000 crop-yield-predictor
-```
+## Uso
 
-## 📝 License
+El análisis principal se encuentra en `notebooks/EDA.ipynb`. El notebook está estructurado para ejecutarse secuencialmente:
 
-This project is part of the Kilimo technical assessment.
+1. Descarga y preparación de datos
+2. Carga y estandarización de dataframes
+3. Combinación de datasets
+4. Limpieza y análisis exploratorio
 
-## 🤝 Contributing
+## Próximos Pasos
 
-This is a technical assessment project. For questions or issues, please refer to the project requirements.
+- Feature engineering adicional
+- Análisis de correlaciones
+- Modelado y evaluación
+- Deployment del pipeline
 
----
+## Notas Técnicas
 
-**Note**: This project emphasizes code quality, modular architecture, and reasoning over completeness. Focus on demonstrating best practices and clean, maintainable code.
+- Los datos se procesan en memoria usando pandas
+- Se mantiene trazabilidad de todas las transformaciones
+- El código está documentado para facilitar reproducibilidad
